@@ -11,16 +11,15 @@ import SwiftUI
 struct ContentView: View {
     let predators = Predators()
     @State var searchText = ""
+    @State var alphabetical: Bool = false
+    @State var currentSelection = PredatorType.all
     
     var filterDinos: [ApexPredator]{
-        if searchText.isEmpty{
-            return predators.apexPredator
-        }else{
-            return predators.apexPredator.filter { predator in
-                predator.name
-                    .localizedCaseInsensitiveContains(searchText)
-            }
-        }
+        predators.filter(by: currentSelection)
+        predators.sort(by: alphabetical)
+        
+       return predators.search(for: searchText)
+
     }
 
     var body: some View {
@@ -38,7 +37,7 @@ struct ContentView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/,height: 100)
-                        .shadow(color:.white, radius: 2)
+                        .shadow(color:.white, radius: 1)
                     
                     
                     VStack(alignment: .leading){
@@ -75,6 +74,38 @@ struct ContentView: View {
         .searchable(text: $searchText)
         .autocorrectionDisabled()
         .animation(.default, value: searchText)
+        .toolbar{
+            ToolbarItem(placement: .topBarLeading){
+                Button{
+                    withAnimation{
+                        alphabetical.toggle()
+                    }
+                }label: {
+                    Image(systemName: alphabetical ? "film" : "textformat")
+                        .symbolEffect(.bounce, value: alphabetical)
+//                    if alphabetical{
+//                        Image(systemName: "film")
+//                    }else{
+//                        Image(systemName: "textformat")
+//                    }
+                    
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu{
+                    Picker("Filter",selection: $currentSelection.animation()){
+                        ForEach(PredatorType.allCases){
+                            type in
+                            Label(type.rawValue.capitalized,systemImage: type.icon)
+                        }
+                    }
+                    
+                }label: {
+                    Image(systemName: "slider.horizontal.3")
+                }
+            }
+        }
+
                 
                 
     }.preferredColorScheme(/*@START_MENU_TOKEN@*/.dark/*@END_MENU_TOKEN@*/)
