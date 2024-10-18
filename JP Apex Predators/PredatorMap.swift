@@ -2,17 +2,48 @@
 //  PredatorMap.swift
 //  JP Apex Predators
 //
-//  Created by Anup Saud on 2024-07-16.
+//  Created by Anup Saud on 2024-10-18.
 //
 
 import SwiftUI
+import MapKit
 
 struct PredatorMap: View {
+    let predators = Predators()
+    @State var position: MapCameraPosition
+    @State var satellite:Bool = false
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Map(position: $position){
+            ForEach(predators.apexPredator){ predator in
+                Annotation(predator.name, coordinate: predator.location) {
+                    Image(predator.image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 100)
+                        .shadow(color: .white, radius: 3)
+                        .scaleEffect(x: -1)
+                }
+            }
+        }.mapStyle(satellite ? .imagery(elevation: .realistic): .standard(elevation: .realistic))
+            .overlay(alignment:.bottomTrailing){
+                Button{
+                    satellite.toggle()
+                }label: {
+                    Image(systemName: satellite ? "globe.americas.fill":"globe.americas")
+                        .font(.largeTitle)
+                        .imageScale(.large)
+                        .padding(3)
+                        .background(.ultraThinMaterial)
+                        .clipShape(.rect(cornerRadius: 7))
+                        .shadow(radius: 3)
+                        .padding()
+                }
+            }
+            .toolbarBackground(.automatic)
     }
 }
 
 #Preview {
-    PredatorMap()
+    PredatorMap(position: .camera(MapCamera(centerCoordinate: Predators().apexPredator[2].location, distance: 1000,heading: 250, pitch: 80)))
+        .preferredColorScheme(.dark)
 }
